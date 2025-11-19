@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전생 체험 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+        </header>
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(to right, #f83600 0%, #f9d423 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">👑</span>
+            </div>
+            <h1 class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">전생 체험 테스트</h1>
+            <p class="test-desc" style="text-align: center; margin-bottom: 2rem;">나는 조선시대에 어떤 모습이었을까?<br>재미로 보는 나의 전생!
+            </p>
+            <button class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p>타임머신 가동 중...</p>
+        </section>
+        <section id="result-screen" class="screen">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">당신의 전생은</h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과 공유하기</button>
+            <button class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            title: "전생 체험 테스트",
+            questions: [
+                { text: "사극을 볼 때 가장 이입되는 캐릭터는?", answers: [{ text: "호통치는 왕", type: "KING" }, { text: "자유로운 영혼의 예술가", type: "ARTIST" }] },
+                { text: "가장 좋아하는 계절은?", answers: [{ text: "화려한 봄", type: "KING" }, { text: "쓸쓸한 가을", type: "SCHOLAR" }] },
+                { text: "친구들과 놀 때 나는?", answers: [{ text: "내가 다 산다! (통 큼)", type: "MERCHANT" }, { text: "더치페이 하자 (합리적)", type: "SCHOLAR" }] },
+                { text: "가장 중요하게 생각하는 가치는?", answers: [{ text: "명예와 권력", type: "KING" }, { text: "돈과 재물", type: "MERCHANT" }] },
+                { text: "하루 종일 아무것도 안 하고 누워있다면?", answers: [{ text: "너무 편하고 좋다", type: "SLOTH" }, { text: "몸이 근질거린다", type: "ARTIST" }] }
+            ],
+            results: {
+                "KING": { title: "천하를 호령하던 '왕' 👑", desc: "당신은 전생에 나라를 다스리던 왕이었습니다.<br>리더십이 있고 자존심이 강한 편이시군요!" },
+                "ARTIST": { title: "풍류를 즐기던 '한량' 🎭", desc: "당신은 전생에 예술과 술을 사랑하던 한량이었습니다.<br>자유로운 영혼의 소유자시군요!" },
+                "SCHOLAR": { title: "대쪽 같은 '선비' 📜", desc: "당신은 전생에 학문에 정진하던 선비였습니다.<br>논리적이고 원칙을 중요하게 생각하시는군요!" },
+                "MERCHANT": { title: "거상 '김만덕' 💰", desc: "당신은 전생에 엄청난 부를 축적한 상인이었습니다.<br>돈 냄새를 맡는 감각이 탁월하시군요!" },
+                "SLOTH": { title: "귀여운 '나무늘보' 🦥", desc: "앗... 사람이 아니었네요.<br>전생에 나무늘보였던 당신은 눕는 걸 제일 좋아합니다." }
+            }
+        };
+        let currentQuestionIndex = 0;
+        let scores = { "KING": 0, "ARTIST": 0, "SCHOLAR": 0, "MERCHANT": 0, "SLOTH": 0 };
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+        function showQuestion() {
+            const question = testConfig.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / testConfig.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+        function selectAnswer(type) {
+            scores[type] = (scores[type] || 0) + 1;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < testConfig.questions.length) showQuestion(); else showLoading();
+        }
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            let maxScore = -1; let resultType = "";
+            for (const [type, score] of Object.entries(scores)) { if (score > maxScore) { maxScore = score; resultType = type; } }
+            const result = testConfig.results[resultType];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+        function shareResult() { shareContent(testConfig.title, `나의 전생은: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

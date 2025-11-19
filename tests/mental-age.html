@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정신 연령 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+        </header>
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(to top, #0ba360 0%, #3cba92 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">👶</span>
+            </div>
+            <h1 class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">정신 연령 테스트</h1>
+            <p class="test-desc" style="text-align: center; margin-bottom: 2rem;">내 몸은 어른이지만 마음은 아직 아이일지도?<br>당신의 진짜 나이를
+                알려드립니다.</p>
+            <button class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p>뇌파 스캔 중...</p>
+        </section>
+        <section id="result-screen" class="screen">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">당신의 정신 연령은</h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과 공유하기</button>
+            <button class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            title: "정신 연령 테스트",
+            questions: [
+                { text: "길 가다 넘어진 사람을 봤을 때", answers: [{ text: "괜찮으세요? (걱정)", type: "MATURE" }, { text: "풉... (웃음 참음)", type: "KID" }] },
+                { text: "좋아하는 반찬이 나왔을 때", answers: [{ text: "아껴 먹는다", type: "KID" }, { text: "먼저 먹는다", type: "MATURE" }] },
+                { text: "비 오는 날 드는 생각", answers: [{ text: "막걸리에 파전?", type: "OLD" }, { text: "신발 젖겠다 ㅠㅠ", type: "MATURE" }] },
+                { text: "뽀로로 주제가를 들으면?", answers: [{ text: "노는 게 제일 좋아~ (따라 부름)", type: "KID" }, { text: "요즘 애들은 뭐 보나?", type: "OLD" }] },
+                { text: "놀이공원에 가면?", answers: [{ text: "회전목마 타자!", type: "KID" }, { text: "벤치에서 좀 쉴까?", type: "OLD" }] }
+            ],
+            results: {
+                "KID": { title: "순수한 영혼 '5세' 👶", desc: "당신은 세상 물정 모르는 순수함을 간직하고 있네요.<br>호기심이 많고 장난기가 가득합니다." },
+                "MATURE": { title: "적당한 사회인 '25세' 🧑‍💼", desc: "당신은 상황에 맞게 행동할 줄 아는 평범한 어른입니다.<br>눈치가 빠르고 적응력이 좋군요." },
+                "OLD": { title: "지혜로운 현자 '80세' 👴", desc: "당신은 인생 2회차? 모든 것에 통달한 듯한 여유가 느껴집니다.<br>가끔은 너무 진지해서 탈이에요." }
+            }
+        };
+        let currentQuestionIndex = 0;
+        let scores = { "KID": 0, "MATURE": 0, "OLD": 0 };
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+        function showQuestion() {
+            const question = testConfig.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / testConfig.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+        function selectAnswer(type) {
+            scores[type] = (scores[type] || 0) + 1;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < testConfig.questions.length) showQuestion(); else showLoading();
+        }
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            let maxScore = -1; let resultType = "";
+            for (const [type, score] of Object.entries(scores)) { if (score > maxScore) { maxScore = score; resultType = type; } }
+            const result = testConfig.results[resultType];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+        function shareResult() { shareContent(testConfig.title, `나의 정신 연령은: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

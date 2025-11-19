@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숨겨진 초능력 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+        </header>
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(to top, #c471f5 0%, #fa71cd 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">⚡</span>
+            </div>
+            <h1 class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">숨겨진 초능력 테스트</h1>
+            <p class="test-desc" style="text-align: center; margin-bottom: 2rem;">평범한 당신에게 숨겨진 특별한 능력이 있다면?<br>지금 바로
+                확인해보세요!</p>
+            <button class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p>DNA 분석 중...</p>
+        </section>
+        <section id="result-screen" class="screen">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">당신의 능력은</h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과 공유하기</button>
+            <button class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            title: "숨겨진 초능력 테스트",
+            questions: [
+                { text: "길을 가다 지갑을 주웠다. 당신은?", answers: [{ text: "주인을 찾아준다", type: "HERO" }, { text: "슬쩍 챙긴다", type: "VILLAIN" }] },
+                { text: "친구가 고민을 털어놓는다면?", answers: [{ text: "끝까지 들어주고 공감한다", type: "MIND" }, { text: "해결책을 제시한다", type: "POWER" }] },
+                { text: "가장 갖고 싶은 능력은?", answers: [{ text: "하늘을 나는 능력", type: "POWER" }, { text: "마음을 읽는 능력", type: "MIND" }] },
+                { text: "위기 상황이 닥치면?", answers: [{ text: "앞장서서 해결한다", type: "HERO" }, { text: "일단 상황을 지켜본다", type: "MIND" }] },
+                { text: "당신은 어떤 사람이 되고 싶나요?", answers: [{ text: "모두에게 사랑받는 사람", type: "HERO" }, { text: "누구도 넘볼 수 없는 강한 사람", type: "VILLAIN" }] }
+            ],
+            results: {
+                "HERO": { title: "정의의 사도 '캡틴 코리아' 🛡️", desc: "당신은 타인을 돕는 따뜻한 마음씨와 리더십을 가졌군요.<br>당신의 능력은 사람들을 이끄는 '카리스마'입니다." },
+                "VILLAIN": { title: "매력적인 악당 '다크 히어로' 😈", desc: "당신은 자신의 욕망에 솔직하고 목표 지향적입니다.<br>당신의 능력은 세상을 바꾸는 '파괴력'입니다." },
+                "MIND": { title: "마음을 읽는 '독심술사' 🔮", desc: "당신은 눈치가 빠르고 공감 능력이 뛰어납니다.<br>당신의 능력은 남들의 속마음을 꿰뚫어 보는 '통찰력'입니다." },
+                "POWER": { title: "무한한 힘 '헐크' 💪", desc: "당신은 에너지가 넘치고 행동력이 강합니다.<br>당신의 능력은 무엇이든 해내는 '추진력'입니다." }
+            }
+        };
+        let currentQuestionIndex = 0;
+        let scores = { "HERO": 0, "VILLAIN": 0, "MIND": 0, "POWER": 0 };
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+        function showQuestion() {
+            const question = testConfig.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / testConfig.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+        function selectAnswer(type) {
+            scores[type] = (scores[type] || 0) + 1;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < testConfig.questions.length) showQuestion(); else showLoading();
+        }
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            let maxScore = -1; let resultType = "";
+            for (const [type, score] of Object.entries(scores)) { if (score > maxScore) { maxScore = score; resultType = type; } }
+            const result = testConfig.results[resultType];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+        function shareResult() { shareContent(testConfig.title, `나의 초능력은: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

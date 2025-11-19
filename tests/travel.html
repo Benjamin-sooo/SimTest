@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>여행지 추천 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+        </header>
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(to top, #30cfd0 0%, #330867 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">✈️</span>
+            </div>
+            <h1 class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">여행지 추천 테스트</h1>
+            <p class="test-desc" style="text-align: center; margin-bottom: 2rem;">지금 당장 떠나고 싶나요?<br>당신에게 딱 맞는 힐링 여행지를
+                찾아드립니다.</p>
+            <button class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p>비행기 티켓 검색 중...</p>
+        </section>
+        <section id="result-screen" class="screen">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">추천 여행지는</h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과 공유하기</button>
+            <button class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            title: "여행지 추천 테스트",
+            questions: [
+                { text: "여행의 목적은?", answers: [{ text: "아무것도 안 하고 쉬기", type: "RELAX" }, { text: "여기저기 돌아다니며 구경하기", type: "ACTIVE" }] },
+                { text: "선호하는 날씨는?", answers: [{ text: "따뜻한 햇살과 바다", type: "WARM" }, { text: "선선한 바람과 야경", type: "COOL" }] },
+                { text: "누구와 함께?", answers: [{ text: "연인이나 친구와 오붓하게", type: "RELAX" }, { text: "새로운 사람들을 만나고 싶어", type: "ACTIVE" }] },
+                { text: "먹고 싶은 음식은?", answers: [{ text: "열대 과일과 해산물", type: "WARM" }, { text: "맥주와 소시지", type: "COOL" }] },
+                { text: "숙소 취향은?", answers: [{ text: "럭셔리한 리조트", type: "RELAX" }, { text: "가성비 좋은 게스트하우스", type: "ACTIVE" }] }
+            ],
+            results: {
+                "RELAX_WARM": { title: "지상 낙원 '몰디브' 🏝️", desc: "아무 생각 없이 푹 쉬고 싶은 당신!<br>에메랄드빛 바다를 보며 모히또 한 잔 어때요?" },
+                "RELAX_COOL": { title: "낭만의 도시 '파리' 🗼", desc: "분위기 있는 휴식을 원하는 당신!<br>센강을 거닐며 예술과 낭만을 즐겨보세요." },
+                "ACTIVE_WARM": { title: "열정의 나라 '스페인' 💃", desc: "에너지가 넘치는 당신!<br>뜨거운 태양 아래서 축제와 미식을 즐겨보세요." },
+                "ACTIVE_COOL": { title: "잠들지 않는 도시 '뉴욕' 🗽", desc: "새로운 자극을 원하는 당신!<br>화려한 도시의 불빛 속에서 주인공이 되어보세요." }
+            }
+        };
+        let currentQuestionIndex = 0;
+        let scores = { "RELAX": 0, "ACTIVE": 0, "WARM": 0, "COOL": 0 };
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+        function showQuestion() {
+            const question = testConfig.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / testConfig.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+        function selectAnswer(type) {
+            scores[type] = (scores[type] || 0) + 1;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < testConfig.questions.length) showQuestion(); else showLoading();
+        }
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            const isRelax = scores["RELAX"] >= scores["ACTIVE"];
+            const isWarm = scores["WARM"] >= scores["COOL"];
+            let resultKey = "";
+            if (isRelax && isWarm) resultKey = "RELAX_WARM";
+            else if (isRelax && !isWarm) resultKey = "RELAX_COOL";
+            else if (!isRelax && isWarm) resultKey = "ACTIVE_WARM";
+            else resultKey = "ACTIVE_COOL";
+            const result = testConfig.results[resultKey];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+        function shareResult() { shareContent(testConfig.title, `추천 여행지는: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

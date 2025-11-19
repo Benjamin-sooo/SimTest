@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이상형 찾기 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+        </header>
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(to right, #b8cbb8 0%, #b8cbb8 0%, #b465da 0%, #cf6cc9 33%, #ee609c 66%, #ee609c 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">💑</span>
+            </div>
+            <h1 class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">이상형 찾기 테스트</h1>
+            <p class="test-desc" style="text-align: center; margin-bottom: 2rem;">나와 딱 맞는 운명의 짝꿍은 누구일까요?<br>당신의 취향을
+                분석해드립니다.</p>
+            <button class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p>데이터베이스 검색 중...</p>
+        </section>
+        <section id="result-screen" class="screen">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">당신의 이상형은</h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과 공유하기</button>
+            <button class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            title: "이상형 찾기 테스트",
+            questions: [
+                { text: "데이트할 때 선호하는 스타일은?", answers: [{ text: "리드해주는 사람이 좋아", type: "LEADER" }, { text: "내 의견을 따라주는 사람이 좋아", type: "FOLLOWER" }] },
+                { text: "연락 빈도는?", answers: [{ text: "하루 종일 연락하고 싶어", type: "EMOTION" }, { text: "필요할 때만 하면 돼", type: "LOGIC" }] },
+                { text: "기념일에는?", answers: [{ text: "로맨틱한 이벤트 필수!", type: "EMOTION" }, { text: "실용적인 선물이 최고", type: "LOGIC" }] },
+                { text: "싸웠을 때?", answers: [{ text: "바로바로 풀어야 해", type: "LEADER" }, { text: "시간을 갖고 생각할래", type: "FOLLOWER" }] },
+                { text: "가장 중요하게 보는 매력 포인트는?", answers: [{ text: "다정함과 공감 능력", type: "EMOTION" }, { text: "지적인 모습과 능력", type: "LOGIC" }] }
+            ],
+            results: {
+                "LEADER_EMOTION": { title: "다정한 리더 '유재석' 타입", desc: "당신을 이끌어주면서도 세심하게 챙겨주는 사람이 잘 맞아요.<br>든든한 오빠/누나 같은 스타일을 찾아보세요!" },
+                "LEADER_LOGIC": { title: "카리스마 CEO '아이언맨' 타입", desc: "당신은 능력 있고 배울 점이 많은 사람에게 끌립니다.<br>자기 일에 열정적인 프로페셔널한 사람이 이상형!" },
+                "FOLLOWER_EMOTION": { title: "귀여운 댕댕이 '연하남/녀' 타입", desc: "당신의 말에 귀 기울여주고 애교 많은 사람이 잘 맞아요.<br>함께 있으면 웃음이 끊이지 않는 비타민 같은 존재!" },
+                "FOLLOWER_LOGIC": { title: "묵묵한 지원군 '매니저' 타입", desc: "당신을 조용히 서포트해주는 차분한 사람이 잘 맞아요.<br>감정 기복 없이 한결같은 사람이 이상형!" }
+            }
+        };
+        let currentQuestionIndex = 0;
+        let scores = { "LEADER": 0, "FOLLOWER": 0, "EMOTION": 0, "LOGIC": 0 };
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+        function showQuestion() {
+            const question = testConfig.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / testConfig.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+        function selectAnswer(type) {
+            scores[type] = (scores[type] || 0) + 1;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < testConfig.questions.length) showQuestion(); else showLoading();
+        }
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            const isLeader = scores["LEADER"] >= scores["FOLLOWER"];
+            const isEmotion = scores["EMOTION"] >= scores["LOGIC"];
+            let resultKey = "";
+            if (isLeader && isEmotion) resultKey = "LEADER_EMOTION";
+            else if (isLeader && !isEmotion) resultKey = "LEADER_LOGIC";
+            else if (!isLeader && isEmotion) resultKey = "FOLLOWER_EMOTION";
+            else resultKey = "FOLLOWER_LOGIC";
+            const result = testConfig.results[resultKey];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+        function shareResult() { shareContent(testConfig.title, `나의 이상형은: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

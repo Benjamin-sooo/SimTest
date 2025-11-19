@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>소울 푸드 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+        </header>
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(to top, #ff0844 0%, #ffb199 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">🍔</span>
+            </div>
+            <h1 class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">소울 푸드 테스트</h1>
+            <p class="test-desc" style="text-align: center; margin-bottom: 2rem;">나를 음식으로 표현한다면 무엇일까요?<br>맛있는 성격 테스트!
+            </p>
+            <button class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p>레시피 분석 중...</p>
+        </section>
+        <section id="result-screen" class="screen">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">당신은</h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과 공유하기</button>
+            <button class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            title: "소울 푸드 테스트",
+            questions: [
+                { text: "스트레스 받을 때 땡기는 맛은?", answers: [{ text: "화끈하게 매운 맛", type: "SPICY" }, { text: "달달한 단 맛", type: "SWEET" }] },
+                { text: "친구들과의 모임 장소는?", answers: [{ text: "시끌벅적한 고깃집", type: "HOT" }, { text: "분위기 좋은 카페", type: "COOL" }] },
+                { text: "나의 평소 성격은?", answers: [{ text: "열정적이고 급하다", type: "HOT" }, { text: "차분하고 느긋하다", type: "COOL" }] },
+                { text: "가장 좋아하는 계절은?", answers: [{ text: "여름", type: "HOT" }, { text: "겨울", type: "COOL" }] },
+                { text: "주말 점심 메뉴는?", answers: [{ text: "라면이나 떡볶이", type: "SPICY" }, { text: "팬케이크나 파스타", type: "SWEET" }] }
+            ],
+            results: {
+                "SPICY_HOT": { title: "화끈한 '마라탕' 🌶️", desc: "당신은 열정적이고 화끈한 성격의 소유자!<br>주변 사람들에게 강렬한 인상을 남기는 인싸입니다." },
+                "SWEET_HOT": { title: "겉바속촉 '치킨' 🍗", desc: "당신은 누구에게나 사랑받는 국민 간식 같은 존재!<br>친화력이 좋고 에너지가 넘칩니다." },
+                "SPICY_COOL": { title: "톡 쏘는 '비빔냉면' 🍜", desc: "당신은 차가워 보이지만 속은 따뜻한 반전 매력의 소유자!<br>솔직하고 시원시원한 성격입니다." },
+                "SWEET_COOL": { title: "부드러운 '바닐라 라떼' ☕", desc: "당신은 부드럽고 온화한 성격의 소유자!<br>주변 사람들을 편안하게 해주는 힐러입니다." }
+            }
+        };
+        let currentQuestionIndex = 0;
+        let scores = { "SPICY": 0, "SWEET": 0, "HOT": 0, "COOL": 0 };
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+        function showQuestion() {
+            const question = testConfig.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / testConfig.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+        function selectAnswer(type) {
+            scores[type] = (scores[type] || 0) + 1;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < testConfig.questions.length) showQuestion(); else showLoading();
+        }
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            const isSpicy = scores["SPICY"] >= scores["SWEET"];
+            const isHot = scores["HOT"] >= scores["COOL"];
+            let resultKey = "";
+            if (isSpicy && isHot) resultKey = "SPICY_HOT";
+            else if (!isSpicy && isHot) resultKey = "SWEET_HOT";
+            else if (isSpicy && !isHot) resultKey = "SPICY_COOL";
+            else resultKey = "SWEET_COOL";
+            const result = testConfig.results[resultKey];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+        function shareResult() { shareContent(testConfig.title, `나의 소울 푸드는: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

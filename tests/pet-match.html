@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>반려동물 매칭 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+        </header>
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">🐶</span>
+            </div>
+            <h1 class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">반려동물 매칭 테스트</h1>
+            <p class="test-desc" style="text-align: center; margin-bottom: 2rem;">나랑 찰떡궁합인 반려동물은?<br>강아지? 고양이? 아니면...
+            </p>
+            <button class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p>동물 친구들을 부르는 중...</p>
+        </section>
+        <section id="result-screen" class="screen">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">당신의 단짝은</h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과 공유하기</button>
+            <button class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            title: "반려동물 매칭 테스트",
+            questions: [
+                { text: "집에 있을 때 나는?", answers: [{ text: "계속 돌아다닌다", type: "DOG" }, { text: "침대와 한 몸이 된다", type: "CAT" }] },
+                { text: "산책을 좋아하나요?", answers: [{ text: "매일 나가고 싶어!", type: "DOG" }, { text: "집 앞 편의점도 멀다", type: "CAT" }] },
+                { text: "누군가 나를 귀찮게 한다면?", answers: [{ text: "같이 놀자고 꼬리 친다", type: "DOG" }, { text: "무시하거나 하악질", type: "CAT" }] },
+                { text: "외로움을 많이 타나요?", answers: [{ text: "혼자 있으면 너무 심심해", type: "DOG" }, { text: "혼자만의 시간이 필요해", type: "CAT" }] },
+                { text: "털 날리는 건?", answers: [{ text: "감수할 수 있다", type: "DOG" }, { text: "절대 싫어!", type: "FISH" }] }
+            ],
+            results: {
+                "DOG": { title: "애교만점 '강아지' 🐶", desc: "당신은 활발하고 사랑이 넘치는 강아지와 잘 맞아요.<br>함께 산책하며 즐거운 추억을 만들어보세요!" },
+                "CAT": { title: "시크한 매력 '고양이' 🐱", desc: "당신은 독립적이고 깔끔한 고양이와 잘 맞아요.<br>서로의 영역을 존중하며 평화로운 일상을 즐겨보세요." },
+                "FISH": { title: "조용한 힐링 '열대어' 🐠", desc: "당신은 조용히 바라보며 힐링할 수 있는 물고기와 잘 맞아요.<br>물멍을 때리며 스트레스를 날려보세요." },
+                "HAMSTER": { title: "귀염뽀짝 '햄스터' 🐹", desc: "당신은 작고 소중한 햄스터와 잘 맞아요.<br>손바닥 위의 작은 친구와 교감해보세요." }
+            }
+        };
+        let currentQuestionIndex = 0;
+        let scores = { "DOG": 0, "CAT": 0, "FISH": 0, "HAMSTER": 0 };
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+        function showQuestion() {
+            const question = testConfig.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / testConfig.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+        function selectAnswer(type) {
+            scores[type] = (scores[type] || 0) + 1;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < testConfig.questions.length) showQuestion(); else showLoading();
+        }
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            let maxScore = -1; let resultType = "DOG";
+            for (const [type, score] of Object.entries(scores)) { if (score > maxScore) { maxScore = score; resultType = type; } }
+            const result = testConfig.results[resultType];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+        function shareResult() { shareContent(testConfig.title, `나의 반려동물은: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

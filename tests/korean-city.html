@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국 도시 추천 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+            <div class="header-controls" style="position: absolute; top: 1rem; right: 1rem;">
+                <button class="btn-icon" id="lang-btn" onclick="toggleLanguage()" title="언어 변경"
+                    style="font-size: 0.9rem; font-weight: bold; width: auto; padding: 0 0.5rem;">EN</button>
+            </div>
+        </header>
+
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(to top, #a8edea 0%, #fed6e3 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">🏙️</span>
+            </div>
+            <h1 id="test-title" class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">한국
+                도시 추천 테스트</h1>
+            <p id="test-desc" class="test-desc" style="text-align: center; margin-bottom: 2rem;">나에게 딱 맞는 한국
+                여행지는?<br>서울? 부산? 제주?</p>
+            <button id="btn-start" class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p id="loading-text">지도 펼치는 중...</p>
+        </section>
+
+        <section id="result-screen" class="screen">
+            <h2 id="result-label" style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">추천 도시는
+            </h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button id="btn-share" class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과
+                공유하기</button>
+            <button id="btn-retry" class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button id="btn-home" class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            ko: {
+                title: "한국 도시 추천 테스트",
+                desc: "나에게 딱 맞는 한국 여행지는?<br>서울? 부산? 제주?",
+                questions: [
+                    { text: "여행에서 가장 중요한 것은?", answers: [{ text: "화려한 도시와 쇼핑", type: "CITY" }, { text: "아름다운 자연과 힐링", type: "NATURE" }] },
+                    { text: "선호하는 음식 스타일은?", answers: [{ text: "트렌디한 카페와 맛집", type: "MODERN" }, { text: "전통적이고 토속적인 맛", type: "TRADITION" }] },
+                    { text: "누구와 함께 가나요?", answers: [{ text: "친구들과 신나게", type: "ACTIVE" }, { text: "혼자서 조용하게", type: "CALM" }] },
+                    { text: "바다 vs 산?", answers: [{ text: "탁 트인 바다", type: "SEA" }, { text: "역사가 깃든 산/유적지", type: "HISTORY" }] },
+                    { text: "밤에는 무엇을 하고 싶나요?", answers: [{ text: "야경을 보며 칵테일 한 잔", type: "CITY" }, { text: "밤바다 소리 듣기", type: "NATURE" }] }
+                ],
+                results: {
+                    "SEOUL": { title: "다이나믹 코리아 '서울' 🏙️", desc: "K-Culture의 중심! 쇼핑, 맛집, 문화생활을 모두 즐기고 싶은 당신에게 딱입니다.<br>홍대, 강남, 경복궁을 둘러보세요." },
+                    "BUSAN": { title: "열정의 항구도시 '부산' 🌊", desc: "바다와 도시의 매력을 동시에! 활기찬 에너지를 느끼고 싶은 당신에게 추천합니다.<br>해운대, 광안리에서 바다를 즐기세요." },
+                    "JEJU": { title: "힐링 아일랜드 '제주도' 🍊", desc: "아름다운 자연 속에서 여유를 즐기고 싶은 당신!<br>에메랄드빛 바다와 오름을 거닐며 힐링하세요." },
+                    "GYEONGJU": { title: "천년의 고도 '경주' 🏯", desc: "한국의 전통과 역사를 느끼고 싶은 당신!<br>불국사, 첨성대를 보며 시간 여행을 떠나보세요." }
+                },
+                ui: { start: "테스트 시작하기", loading: "지도 펼치는 중...", resultLabel: "추천 도시는", share: "결과 공유하기", retry: "다시 하기", home: "다른 테스트 하러가기" }
+            },
+            en: {
+                title: "Korean City Match Test",
+                desc: "Which Korean city suits you best?<br>Seoul? Busan? Jeju?",
+                questions: [
+                    { text: "Most important in travel?", answers: [{ text: "City lights & Shopping", type: "CITY" }, { text: "Nature & Healing", type: "NATURE" }] },
+                    { text: "Food preference?", answers: [{ text: "Trendy Cafes & Restaurants", type: "MODERN" }, { text: "Traditional & Local Food", type: "TRADITION" }] },
+                    { text: "Who are you with?", answers: [{ text: "Exciting trip with friends", type: "ACTIVE" }, { text: "Quiet solo trip", type: "CALM" }] },
+                    { text: "Sea vs Mountain?", answers: [{ text: "Open Sea", type: "SEA" }, { text: "Historic Sites/Mountains", type: "HISTORY" }] },
+                    { text: "What to do at night?", answers: [{ text: "Cocktail with night view", type: "CITY" }, { text: "Listening to ocean waves", type: "NATURE" }] }
+                ],
+                results: {
+                    "SEOUL": { title: "Dynamic 'Seoul' 🏙️", desc: "The heart of K-Culture! Perfect for shopping, food, and culture.<br>Visit Hongdae, Gangnam, and Gyeongbokgung Palace." },
+                    "BUSAN": { title: "Passion City 'Busan' 🌊", desc: "Mix of ocean and city vibes! Recommended for energetic travelers.<br>Enjoy Haeundae and Gwangalli beaches." },
+                    "JEJU": { title: "Healing Island 'Jeju' 🍊", desc: "Relax in beautiful nature!<br>Walk along the emerald beaches and Oreums." },
+                    "GYEONGJU": { title: "Ancient City 'Gyeongju' 🏯", desc: "Feel the tradition and history of Korea!<br>Travel back in time at Bulguksa Temple and Cheomseongdae." }
+                },
+                ui: { start: "Start Test", loading: "Opening Map...", resultLabel: "Recommended City", share: "Share Result", retry: "Retry", home: "Go to Home" }
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let scores = { "SEOUL": 0, "BUSAN": 0, "JEJU": 0, "GYEONGJU": 0 };
+        let langData = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const lang = localStorage.getItem('lang') || 'ko';
+            langData = testConfig[lang] || testConfig['ko'];
+
+            document.title = langData.title + " - SimTest";
+            document.getElementById('test-title').innerHTML = langData.title;
+            document.getElementById('test-desc').innerHTML = langData.desc;
+            document.getElementById('btn-start').innerText = langData.ui.start;
+            document.getElementById('loading-text').innerText = langData.ui.loading;
+            document.getElementById('result-label').innerText = langData.ui.resultLabel;
+            document.getElementById('btn-share').innerText = langData.ui.share;
+            document.getElementById('btn-retry').innerText = langData.ui.retry;
+            document.getElementById('btn-home').innerText = langData.ui.home;
+        });
+
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+        function showQuestion() {
+            const question = langData.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / langData.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+        function selectAnswer(type) {
+            // Simplified Logic for MVP
+            if (type === "CITY" || type === "MODERN") scores["SEOUL"]++;
+            if (type === "SEA" || type === "ACTIVE") scores["BUSAN"]++;
+            if (type === "NATURE" || type === "CALM") scores["JEJU"]++;
+            if (type === "HISTORY" || type === "TRADITION") scores["GYEONGJU"]++;
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < langData.questions.length) showQuestion(); else showLoading();
+        }
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            let maxScore = -1; let resultType = "SEOUL";
+            for (const [type, score] of Object.entries(scores)) { if (score > maxScore) { maxScore = score; resultType = type; } }
+            const result = langData.results[resultType];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+        function shareResult() { shareContent(langData.title, `${langData.ui.resultLabel}: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

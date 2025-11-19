@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>탕후루 성격 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+        </header>
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(to right, #fa709a 0%, #fee140 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">🍡</span>
+            </div>
+            <h1 class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">탕후루 성격 테스트</h1>
+            <p class="test-desc" style="text-align: center; margin-bottom: 2rem;">겉바속촉? 나의 성격 당도는 몇 프로일까?<br>달콤한 탕후루로
+                알아보는 내 성격!</p>
+            <button class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p>설탕 코팅 입히는 중...</p>
+        </section>
+        <section id="result-screen" class="screen">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">당신은</h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과 공유하기</button>
+            <button class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            title: "탕후루 성격 테스트",
+            questions: [
+                { text: "처음 만난 사람에게 나는?", answers: [{ text: "먼저 말을 건다 (겉이 바삭)", type: "HARD" }, { text: "수줍게 웃는다 (겉이 말랑)", type: "SOFT" }] },
+                { text: "친해지면 나는?", answers: [{ text: "애교가 많아진다 (속이 촉촉)", type: "MOIST" }, { text: "장난을 많이 친다 (속이 단단)", type: "SOLID" }] },
+                { text: "화가 났을 때?", answers: [{ text: "참다가 폭발한다", type: "HARD" }, { text: "바로바로 푼다", type: "SOFT" }] },
+                { text: "나의 매력 포인트는?", answers: [{ text: "반전 매력", type: "MOIST" }, { text: "한결같은 모습", type: "SOLID" }] },
+                { text: "가장 좋아하는 맛은?", answers: [{ text: "상큼한 딸기", type: "STRAWBERRY" }, { text: "달달한 샤인머스켓", type: "GRAPE" }] }
+            ],
+            results: {
+                "STRAWBERRY": { title: "상큼발랄 '딸기 탕후루' 🍓", desc: "당신은 어디서나 인기 많은 분위기 메이커!<br>겉은 바삭하고 속은 상큼한 매력이 터집니다." },
+                "GRAPE": { title: "달콤한 '샤인머스켓 탕후루' 🍇", desc: "당신은 알면 알수록 진국인 볼매 스타일!<br>톡 터지는 달콤함으로 주변을 기분 좋게 만듭니다." },
+                "TOMATO": { title: "반전 매력 '토마토 탕후루' 🍅", desc: "호불호가 갈릴 수 있지만 마니아층이 확실한 당신!<br>독특한 매력으로 사람들을 끌어당깁니다." },
+                "MANDARIN": { title: "과즙 팡팡 '귤 탕후루' 🍊", desc: "당신은 보기만 해도 기분 좋아지는 인간 비타민!<br>상큼하고 긍정적인 에너지가 넘칩니다." }
+            }
+        };
+        let currentQuestionIndex = 0;
+        let scores = { "STRAWBERRY": 0, "GRAPE": 0, "TOMATO": 0, "MANDARIN": 0 };
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+        function showQuestion() {
+            const question = testConfig.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / testConfig.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+        function selectAnswer(type) {
+            // Simple mapping for MVP
+            if (type === "HARD" || type === "MOIST") scores["STRAWBERRY"]++;
+            if (type === "SOFT" || type === "SOLID") scores["GRAPE"]++;
+
+            if (scores[type] !== undefined) scores[type]++;
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < testConfig.questions.length) showQuestion(); else showLoading();
+        }
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            let maxScore = -1; let resultType = "STRAWBERRY";
+            for (const [type, score] of Object.entries(scores)) { if (score > maxScore) { maxScore = score; resultType = type; } }
+            const result = testConfig.results[resultType];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+        function shareResult() { shareContent(testConfig.title, `나의 성격 당도는: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

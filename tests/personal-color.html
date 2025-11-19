@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퍼스널 컬러 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .color-chip {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 5px;
+            box-shadow: var(--shadow-sm);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+            <div class="header-controls" style="position: absolute; top: 1rem; right: 1rem;">
+                <button class="btn-icon" id="lang-btn" onclick="toggleLanguage()" title="언어 변경"
+                    style="font-size: 0.9rem; font-weight: bold; width: auto; padding: 0 0.5rem;">EN</button>
+            </div>
+        </header>
+
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">🎨</span>
+            </div>
+            <h1 id="test-title" class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">퍼스널
+                컬러 테스트</h1>
+            <p id="test-desc" class="test-desc" style="text-align: center; margin-bottom: 2rem;">나에게 가장 잘 어울리는 색은
+                무엇일까요?<br>성격과 취향으로 알아보는 나의 퍼스널 컬러!</p>
+            <button id="btn-start" class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p id="loading-text">당신의 컬러를 분석 중입니다...</p>
+        </section>
+
+        <section id="result-screen" class="screen">
+            <h2 id="result-label" style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">당신의
+                퍼스널 컬러는</h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button id="btn-share" class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과
+                공유하기</button>
+            <button id="btn-retry" class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button id="btn-home" class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            ko: {
+                title: "퍼스널 컬러 테스트",
+                desc: "나에게 가장 잘 어울리는 색은 무엇일까요?<br>성격과 취향으로 알아보는 나의 퍼스널 컬러!",
+                questions: [
+                    { text: "평소에 즐겨 입는 옷의 색깔은?", answers: [{ text: "따뜻한 베이지, 오렌지, 브라운 계열", type: "WARM" }, { text: "시원한 화이트, 블루, 블랙 계열", type: "COOL" }] },
+                    { text: "햇빛을 받으면 피부가 어떻게 변하나요?", answers: [{ text: "검게 잘 탄다", type: "WARM" }, { text: "빨갛게 익는다", type: "COOL" }] },
+                    { text: "액세서리를 한다면?", answers: [{ text: "골드 쥬얼리", type: "WARM" }, { text: "실버 쥬얼리", type: "COOL" }] },
+                    { text: "나의 이미지는?", answers: [{ text: "생기발랄하고 귀여운 느낌 (봄/여름)", type: "LIGHT" }, { text: "차분하고 분위기 있는 느낌 (가을/겨울)", type: "DEEP" }] },
+                    { text: "친구들이 말하는 나의 첫인상은?", answers: [{ text: "따뜻하고 친근해 보인다", type: "WARM" }, { text: "도도하고 시크해 보인다", type: "COOL" }] }
+                ],
+                results: {
+                    "WARM_LIGHT": { title: "봄 웜톤 (Spring Warm)", desc: "당신은 생기발랄하고 따뜻한 봄 햇살 같은 사람입니다.<br><br><strong>추천 컬러:</strong><br><div><span class='color-chip' style='background:#FFD700'></span><span class='color-chip' style='background:#FFA07A'></span><span class='color-chip' style='background:#98FB98'></span></div>" },
+                    "WARM_DEEP": { title: "가을 웜톤 (Autumn Warm)", desc: "당신은 그윽하고 분위기 있는 가을 낙엽 같은 사람입니다.<br><br><strong>추천 컬러:</strong><br><div><span class='color-chip' style='background:#8B4513'></span><span class='color-chip' style='background:#D2691E'></span><span class='color-chip' style='background:#556B2F'></span></div>" },
+                    "COOL_LIGHT": { title: "여름 쿨톤 (Summer Cool)", desc: "당신은 청량하고 깨끗한 여름 바다 같은 사람입니다.<br><br><strong>추천 컬러:</strong><br><div><span class='color-chip' style='background:#E0FFFF'></span><span class='color-chip' style='background:#D8BFD8'></span><span class='color-chip' style='background:#ADD8E6'></span></div>" },
+                    "COOL_DEEP": { title: "겨울 쿨톤 (Winter Cool)", desc: "당신은 카리스마 있고 도시적인 겨울 눈꽃 같은 사람입니다.<br><br><strong>추천 컬러:</strong><br><div><span class='color-chip' style='background:#000000'></span><span class='color-chip' style='background:#000080'></span><span class='color-chip' style='background:#DC143C'></span></div>" }
+                },
+                ui: { start: "테스트 시작하기", loading: "당신의 컬러를 분석 중입니다...", resultLabel: "당신의 퍼스널 컬러는", share: "결과 공유하기", retry: "다시 하기", home: "다른 테스트 하러가기" }
+            },
+            en: {
+                title: "Personal Color Test",
+                desc: "What color suits you best?<br>Find out based on your personality!",
+                questions: [
+                    { text: "Favorite clothes color?", answers: [{ text: "Warm Beige, Orange, Brown", type: "WARM" }, { text: "Cool White, Blue, Black", type: "COOL" }] },
+                    { text: "Reaction to sunlight?", answers: [{ text: "Tan easily", type: "WARM" }, { text: "Turn red", type: "COOL" }] },
+                    { text: "Jewelry preference?", answers: [{ text: "Gold Jewelry", type: "WARM" }, { text: "Silver Jewelry", type: "COOL" }] },
+                    { text: "Your image?", answers: [{ text: "Lively & Cute (Spring/Summer)", type: "LIGHT" }, { text: "Calm & Atmospheric (Autumn/Winter)", type: "DEEP" }] },
+                    { text: "First impression?", answers: [{ text: "Warm & Friendly", type: "WARM" }, { text: "Chic & Cool", type: "COOL" }] }
+                ],
+                results: {
+                    "WARM_LIGHT": { title: "Spring Warm", desc: "You are like lively and warm spring sunlight.<br><br><strong>Recommended Colors:</strong><br><div><span class='color-chip' style='background:#FFD700'></span><span class='color-chip' style='background:#FFA07A'></span><span class='color-chip' style='background:#98FB98'></span></div>" },
+                    "WARM_DEEP": { title: "Autumn Warm", desc: "You are like atmospheric autumn leaves.<br><br><strong>Recommended Colors:</strong><br><div><span class='color-chip' style='background:#8B4513'></span><span class='color-chip' style='background:#D2691E'></span><span class='color-chip' style='background:#556B2F'></span></div>" },
+                    "COOL_LIGHT": { title: "Summer Cool", desc: "You are like the refreshing summer sea.<br><br><strong>Recommended Colors:</strong><br><div><span class='color-chip' style='background:#E0FFFF'></span><span class='color-chip' style='background:#D8BFD8'></span><span class='color-chip' style='background:#ADD8E6'></span></div>" },
+                    "COOL_DEEP": { title: "Winter Cool", desc: "You are like a charismatic winter snowflake.<br><br><strong>Recommended Colors:</strong><br><div><span class='color-chip' style='background:#000000'></span><span class='color-chip' style='background:#000080'></span><span class='color-chip' style='background:#DC143C'></span></div>" }
+                },
+                ui: { start: "Start Test", loading: "Analyzing your color...", resultLabel: "Your Personal Color is", share: "Share Result", retry: "Retry", home: "Go to Home" }
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let scores = { "WARM": 0, "COOL": 0, "LIGHT": 0, "DEEP": 0 };
+        let langData = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const lang = localStorage.getItem('lang') || 'ko';
+            langData = testConfig[lang] || testConfig['ko'];
+
+            document.title = langData.title + " - SimTest";
+            document.getElementById('test-title').innerHTML = langData.title;
+            document.getElementById('test-desc').innerHTML = langData.desc;
+            document.getElementById('btn-start').innerText = langData.ui.start;
+            document.getElementById('loading-text').innerText = langData.ui.loading;
+            document.getElementById('result-label').innerText = langData.ui.resultLabel;
+            document.getElementById('btn-share').innerText = langData.ui.share;
+            document.getElementById('btn-retry').innerText = langData.ui.retry;
+            document.getElementById('btn-home').innerText = langData.ui.home;
+        });
+
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+        function showQuestion() {
+            const question = langData.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / langData.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+        function selectAnswer(type) {
+            scores[type] = (scores[type] || 0) + 1;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < langData.questions.length) showQuestion(); else showLoading();
+        }
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+
+            const isWarm = scores["WARM"] >= scores["COOL"];
+            const isLight = scores["LIGHT"] >= scores["DEEP"];
+            let resultKey = "";
+            if (isWarm && isLight) resultKey = "WARM_LIGHT";
+            else if (isWarm && !isLight) resultKey = "WARM_DEEP";
+            else if (!isWarm && isLight) resultKey = "COOL_LIGHT";
+            else resultKey = "COOL_DEEP";
+
+            const result = langData.results[resultKey];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+        function shareResult() { shareContent(langData.title, `${langData.ui.resultLabel}: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

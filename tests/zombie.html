@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>좀비 생존력 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+        </header>
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(to top, #50cc7f 0%, #f5d100 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">🧟</span>
+            </div>
+            <h1 class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">좀비 생존력 테스트</h1>
+            <p class="test-desc" style="text-align: center; margin-bottom: 2rem;">좀비 바이러스가 퍼졌다!<br>당신은 끝까지 살아남을 수 있을까요?
+            </p>
+            <button class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p>생존 확률 계산 중...</p>
+        </section>
+        <section id="result-screen" class="screen">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">당신의 생존 등급은</h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과 공유하기</button>
+            <button class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            title: "좀비 생존력 테스트",
+            questions: [
+                { text: "뉴스에서 좀비 출몰 속보가 떴다!", answers: [{ text: "마트로 가서 식량을 챙긴다", type: "SURVIVOR" }, { text: "집 문을 잠그고 숨는다", type: "SCARED" }] },
+                { text: "좀비가 쫓아온다! 무기는?", answers: [{ text: "야구방망이 (근접전)", type: "FIGHTER" }, { text: "빠른 발 (도망)", type: "RUNNER" }] },
+                { text: "낯선 생존자를 만났다.", answers: [{ text: "함께 다니자고 제안한다", type: "LEADER" }, { text: "의심스러우니 피한다", type: "SOLO" }] },
+                { text: "친구가 좀비에게 물렸다...", answers: [{ text: "미안해... 처리한다", type: "COLD" }, { text: "치료법이 있을 거야! 데리고 간다", type: "EMOTION" }] },
+                { text: "마지막 헬기가 도착했다! 자리가 하나뿐이라면?", answers: [{ text: "내가 탄다", type: "SURVIVOR" }, { text: "양보한다", type: "HERO" }] }
+            ],
+            results: {
+                "SURVIVOR": { title: "생존 확률 99% '최후의 1인' 🏆", desc: "당신은 냉철한 판단력과 생존 본능을 가졌습니다.<br>어떤 상황에서도 살아남을 수 있는 능력이 있군요." },
+                "HERO": { title: "생존 확률 50% '희생적인 영웅' 🦸", desc: "당신은 남을 돕다가 위험에 처할 수 있습니다.<br>하지만 당신 덕분에 많은 사람이 살 수 있을 거예요." },
+                "SCARED": { title: "생존 확률 10% '초반 희생양' 💀", desc: "겁이 많고 우왕좌왕하다가 당할 수 있습니다.<br>믿을 수 있는 동료를 찾는 것이 중요해요!" },
+                "FIGHTER": { title: "생존 확률 80% '좀비 사냥꾼' 🔫", desc: "당신은 좀비와 맞서 싸우는 전투력이 뛰어납니다.<br>하지만 너무 무모하게 덤비지는 마세요." }
+            }
+        };
+        let currentQuestionIndex = 0;
+        let scores = { "SURVIVOR": 0, "HERO": 0, "SCARED": 0, "FIGHTER": 0 };
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+        function showQuestion() {
+            const question = testConfig.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / testConfig.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+        function selectAnswer(type) {
+            // Simplified logic mapping for this specific test structure
+            // Just counting types directly for simplicity in this MVP
+            if (type === "LEADER" || type === "COLD") scores["SURVIVOR"]++;
+            if (type === "SOLO" || type === "RUNNER") scores["SCARED"]++; // Just mapping for example
+            if (type === "EMOTION") scores["HERO"]++;
+
+            // Direct mapping for explicit types
+            if (scores[type] !== undefined) scores[type]++;
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < testConfig.questions.length) showQuestion(); else showLoading();
+        }
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            let maxScore = -1; let resultType = "SCARED"; // Default
+            for (const [type, score] of Object.entries(scores)) { if (score > maxScore) { maxScore = score; resultType = type; } }
+            const result = testConfig.results[resultType];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+        function shareResult() { shareContent(testConfig.title, `나의 생존 확률은: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>직장인 멘탈 테스트 - SimTest</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        /* Test Specific Styles */
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #E5E7EB;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #F5F3FF;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header" style="padding-bottom: 0;">
+            <a href="../index.html" class="logo" style="font-size: 1.5rem;">SimTest</a>
+            <div class="header-controls" style="position: absolute; top: 1rem; right: 1rem;">
+                <button class="btn-icon" id="lang-btn" onclick="toggleLanguage()" title="언어 변경"
+                    style="font-size: 0.9rem; font-weight: bold; width: auto; padding: 0 0.5rem;">EN</button>
+            </div>
+        </header>
+
+        <section id="start-screen" class="screen active">
+            <div class="test-thumbnail"
+                style="height: 250px; background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); margin: 2rem 0; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">🤯</span>
+            </div>
+            <h1 id="test-title" class="test-title" style="font-size: 2rem; text-align: center; margin-bottom: 1rem;">직장인
+                멘탈 테스트</h1>
+            <p id="test-desc" class="test-desc" style="text-align: center; margin-bottom: 2rem;">출근길이 지옥 같나요? 퇴사 욕구가
+                솟구치나요?<br>당신의 번아웃 지수를 확인해보세요.</p>
+            <button id="btn-start" class="btn-primary" onclick="startTest()">테스트 시작하기</button>
+        </section>
+
+        <section id="question-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <h2 id="question-text" class="question-text">질문 내용</h2>
+            <div id="answer-container"></div>
+        </section>
+
+        <section id="loading-screen" class="screen" style="text-align: center; padding-top: 5rem;">
+            <div class="loading-spinner"></div>
+            <p id="loading-text">분석 중...</p>
+        </section>
+
+        <section id="result-screen" class="screen">
+            <h2 id="result-label" style="text-align: center; color: var(--primary-color); margin-bottom: 0.5rem;">결과
+            </h2>
+            <h1 id="result-title" style="font-size: 2rem; text-align: center; margin-bottom: 1.5rem;">결과 제목</h1>
+            <div id="result-content"
+                style="background: #fff; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center;">
+            </div>
+            <button id="btn-share" class="btn-primary" onclick="shareResult()" style="margin-top: 2rem;">결과
+                공유하기</button>
+            <button id="btn-retry" class="btn-primary" onclick="location.reload()"
+                style="background: #fff; color: var(--text-main); border: 1px solid var(--border-color); margin-top: 1rem;">다시
+                하기</button>
+            <button id="btn-home" class="btn-primary" onclick="location.href='../index.html'"
+                style="background: var(--text-main); margin-top: 1rem;">다른 테스트 하러가기</button>
+        </section>
+    </div>
+    <script src="../js/main.js"></script>
+    <script>
+        const testConfig = {
+            ko: {
+                title: "직장인 멘탈 테스트",
+                desc: "출근길이 지옥 같나요? 퇴사 욕구가 솟구치나요?<br>당신의 번아웃 지수를 확인해보세요.",
+                questions: [
+                    { text: "아침에 알람 소리를 들으면?", answers: [{ text: "벌떡 일어나서 준비한다", type: "GOOD" }, { text: "5분만 더... 하다가 지각 위기", type: "BAD" }] },
+                    { text: "회사 컴퓨터를 켰을 때 기분은?", answers: [{ text: "오늘 할 일을 정리한다", type: "GOOD" }, { text: "집에 가고 싶다...", type: "BAD" }] },
+                    { text: "상사가 불렀을 때 드는 생각", answers: [{ text: "무슨 일이지?", type: "GOOD" }, { text: "아 또 왜...", type: "BAD" }] },
+                    { text: "점심 시간에 나는?", answers: [{ text: "동료들과 맛집 탐방", type: "GOOD" }, { text: "혼자 조용히 쉬고 싶다", type: "BAD" }] },
+                    { text: "일요일 저녁, 개그콘서트 엔딩 음악이 들린다면? (상상)", answers: [{ text: "내일도 화이팅!", type: "GOOD" }, { text: "가슴이 답답하고 숨이 막힌다", type: "BAD" }] }
+                ],
+                results: {
+                    "GOOD": { title: "강철 멘탈 직장인 🛡️", desc: "당신은 아직 쌩쌩합니다! 업무 스트레스를 잘 관리하고 계시네요.<br>하지만 방심은 금물, 가끔은 휴식도 필요해요." },
+                    "BAD": { title: "퇴사 시급! 번아웃 경보 🚨", desc: "위험합니다! 지금 당장 휴가가 필요해요.<br>마음의 병이 깊어지기 전에 잠시 쉬어가는 건 어떨까요?" }
+                },
+                ui: {
+                    start: "테스트 시작하기",
+                    loading: "스트레스 지수 분석 중...",
+                    resultLabel: "당신의 상태는",
+                    share: "결과 공유하기",
+                    retry: "다시 하기",
+                    home: "다른 테스트 하러가기"
+                }
+            },
+            en: {
+                title: "Workplace Burnout Test",
+                desc: "Is your commute hell? Do you want to quit?<br>Check your burnout level.",
+                questions: [
+                    { text: "When you hear the alarm in the morning?", answers: [{ text: "Get up immediately", type: "GOOD" }, { text: "5 more minutes... (Risk of being late)", type: "BAD" }] },
+                    { text: "How do you feel when you turn on your work PC?", answers: [{ text: "Organize today's tasks", type: "GOOD" }, { text: "I want to go home...", type: "BAD" }] },
+                    { text: "When your boss calls you?", answers: [{ text: "What's up?", type: "GOOD" }, { text: "Oh no, not again...", type: "BAD" }] },
+                    { text: "During lunch time?", answers: [{ text: "Eat with colleagues", type: "GOOD" }, { text: "Rest alone quietly", type: "BAD" }] },
+                    { text: "Sunday night feeling?", answers: [{ text: "Ready for tomorrow!", type: "GOOD" }, { text: "Suffocating and heavy chest", type: "BAD" }] }
+                ],
+                results: {
+                    "GOOD": { title: "Steel Mental 🛡️", desc: "You are doing great! You manage work stress well.<br>But don't let your guard down, take a rest sometimes." },
+                    "BAD": { title: "Burnout Alert 🚨", desc: "Danger! You need a vacation right now.<br>Why not take a break before it gets worse?" }
+                },
+                ui: {
+                    start: "Start Test",
+                    loading: "Analyzing stress level...",
+                    resultLabel: "Your Status",
+                    share: "Share Result",
+                    retry: "Retry",
+                    home: "Go to Home"
+                }
+            }
+        };
+
+        let currentQuestionIndex = 0;
+        let scores = { "GOOD": 0, "BAD": 0 };
+        let langData = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const lang = localStorage.getItem('lang') || 'ko';
+            langData = testConfig[lang] || testConfig['ko'];
+
+            document.title = langData.title + " - SimTest";
+            document.getElementById('test-title').innerText = langData.title;
+            document.getElementById('test-desc').innerHTML = langData.desc;
+            document.getElementById('btn-start').innerText = langData.ui.start;
+            document.getElementById('loading-text').innerText = langData.ui.loading;
+            document.getElementById('result-label').innerText = langData.ui.resultLabel;
+            document.getElementById('btn-share').innerText = langData.ui.share;
+            document.getElementById('btn-retry').innerText = langData.ui.retry;
+            document.getElementById('btn-home').innerText = langData.ui.home;
+        });
+
+        function startTest() { document.getElementById('start-screen').classList.remove('active'); document.getElementById('question-screen').classList.add('active'); showQuestion(); }
+
+        function showQuestion() {
+            const question = langData.questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = question.text;
+            document.getElementById('progress').style.width = `${((currentQuestionIndex) / langData.questions.length) * 100}%`;
+            const container = document.getElementById('answer-container');
+            container.innerHTML = '';
+            question.answers.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = answer.text;
+                btn.onclick = () => selectAnswer(answer.type);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(type) {
+            scores[type] = (scores[type] || 0) + 1;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < langData.questions.length) showQuestion(); else showLoading();
+        }
+
+        function showLoading() {
+            document.getElementById('question-screen').classList.remove('active');
+            document.getElementById('loading-screen').classList.add('active');
+            setTimeout(() => showResult(), 1500);
+        }
+
+        function showResult() {
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            const resultKey = scores["GOOD"] >= scores["BAD"] ? "GOOD" : "BAD";
+            const result = langData.results[resultKey];
+            document.getElementById('result-title').innerText = result.title;
+            document.getElementById('result-content').innerHTML = `<p>${result.desc}</p>`;
+        }
+
+        function shareResult() { shareContent(langData.title, `${langData.ui.resultLabel}: ${document.getElementById('result-title').innerText}`, window.location.href); }
+    </script>
+</body>
+
+</html>

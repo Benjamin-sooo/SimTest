@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimTest - 나를 알아보는 심리테스트</title>
+    <meta name="description" content="재미있는 심리테스트 모음. 퍼스널 컬러, 연애 스타일 등 다양한 테스트를 즐겨보세요.">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Pretendard Font (CDN) -->
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="index.html" class="logo">SimTest</a>
+            <div class="header-controls">
+                <button class="btn-icon" id="random-test-btn" onclick="startRandomTest()">
+                    <span>🎲</span>
+                    <span data-i18n="randomBtn">랜덤 테스트</span>
+                </button>
+                <button class="btn-icon" id="theme-toggle" onclick="toggleDarkMode()">
+                    <span>🌙</span>
+                    <span data-i18n="darkModeBtn">다크 모드</span>
+                </button>
+                <button class="btn-icon" id="lang-toggle" onclick="toggleLanguage()">
+                    <span>🌐</span>
+                    <span id="current-lang">KO</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="hero-title">
+                <span data-i18n="heroTitle1">나를 알아가는</span><br>
+                <span class="highlight" data-i18n="heroTitle2">가장 즐거운 방법</span>
+            </h1>
+            <p class="hero-desc" data-i18n="heroDesc">
+                심심할 때, 고민이 있을 때, 친구와 함께.<br>
+                SimTest에서 당신의 진짜 모습을 발견하세요.
+            </p>
+            <button class="btn-hero" onclick="startRandomTest()" data-i18n="heroBtn">
+                ✨ 지금 바로 시작하기
+            </button>
+        </section>
+
+        <div class="category-tabs" id="category-tabs">
+            <button class="tab-btn active" data-category="all" data-i18n="tabAll">전체</button>
+            <button class="tab-btn" data-category="love" data-i18n="tabLove">연애</button>
+            <button class="tab-btn" data-category="personality" data-i18n="tabPersonality">성격</button>
+            <button class="tab-btn" data-category="fun" data-i18n="tabFun">재미</button>
+            <button class="tab-btn" data-category="kwave" data-i18n="tabKwave">한류</button>
+        </div>
+
+        <main class="test-grid animate-fade-in">
+            <!-- Existing Tests -->
+            <article class="test-card" data-category="personality"
+                onclick="navigateToTest('tests/personal-color.html')">
+                <div class="badge-new">HOT</div>
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    🎨</div>
+                <div class="test-info">
+                    <h2 class="test-title">퍼스널 컬러 테스트</h2>
+                    <p class="test-desc">나에게 딱 맞는 컬러는? 성격으로 알아보는 퍼스널 컬러!</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="love" onclick="navigateToTest('tests/dating-style.html')">
+                <div class="badge-new">HOT</div>
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    💘</div>
+                <div class="test-info">
+                    <h2 class="test-title">연애 스타일 테스트</h2>
+                    <p class="test-desc">나는 강아지? 고양이? 숨겨진 나의 연애 본능 확인하기</p>
+                </div>
+            </article>
+
+            <!-- New Tests (10 Types) -->
+            <article class="test-card" data-category="personality" onclick="navigateToTest('tests/burnout.html')">
+                <div class="badge-new">NEW</div>
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    🤯</div>
+                <div class="test-info">
+                    <h2 class="test-title">직장인 멘탈 테스트</h2>
+                    <p class="test-desc">내 마음은 안녕할까? 퇴사 욕구 레벨 측정하기</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="fun" onclick="navigateToTest('tests/superpower.html')">
+                <div class="badge-new">NEW</div>
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to top, #c471f5 0%, #fa71cd 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    ⚡</div>
+                <div class="test-info">
+                    <h2 class="test-title">숨겨진 초능력 테스트</h2>
+                    <p class="test-desc">만약 나에게 초능력이 생긴다면? 잠재된 능력 알아보기</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="fun" onclick="navigateToTest('tests/past-life.html')">
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to right, #f83600 0%, #f9d423 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    👑</div>
+                <div class="test-info">
+                    <h2 class="test-title">전생 체험 테스트</h2>
+                    <p class="test-desc">나는 조선시대에 누구였을까? 왕족? 아니면...</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="fun" onclick="navigateToTest('tests/soul-food.html')">
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to top, #ff0844 0%, #ffb199 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    🍔</div>
+                <div class="test-info">
+                    <h2 class="test-title">소울 푸드 테스트</h2>
+                    <p class="test-desc">나를 음식으로 표현한다면? 떡볶이? 치킨?</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="love" onclick="navigateToTest('tests/ideal-type.html')">
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to right, #b8cbb8 0%, #b8cbb8 0%, #b465da 0%, #cf6cc9 33%, #ee609c 66%, #ee609c 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    💑</div>
+                <div class="test-info">
+                    <h2 class="test-title">이상형 찾기 테스트</h2>
+                    <p class="test-desc">꿈꾸던 이상형은 누구? 나랑 딱 맞는 짝꿍 찾기</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="personality" onclick="navigateToTest('tests/mental-age.html')">
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to top, #0ba360 0%, #3cba92 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    👶</div>
+                <div class="test-info">
+                    <h2 class="test-title">정신 연령 테스트</h2>
+                    <p class="test-desc">내 몸은 어른이지만 마음은? 철없는 어른이 감별!</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="fun" onclick="navigateToTest('tests/travel.html')">
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to top, #30cfd0 0%, #330867 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    ✈️</div>
+                <div class="test-info">
+                    <h2 class="test-title">여행지 추천 테스트</h2>
+                    <p class="test-desc">지금 당장 떠나야 할 곳은 어디? 나만의 힐링 스팟</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="fun" onclick="navigateToTest('tests/zombie.html')">
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to top, #50cc7f 0%, #f5d100 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    🧟</div>
+                <div class="test-info">
+                    <h2 class="test-title">좀비 생존력 테스트</h2>
+                    <p class="test-desc">부산행 찍으면 살아남을 수 있을까? 나의 생존 확률은?</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="personality" onclick="navigateToTest('tests/tanghulu.html')">
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to right, #fa709a 0%, #fee140 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    🍡</div>
+                <div class="test-info">
+                    <h2 class="test-title">탕후루 성격 테스트</h2>
+                    <p class="test-desc">겉바속촉? 나의 성격 당도는 몇 프로일까?</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="fun" onclick="navigateToTest('tests/pet-match.html')">
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    🐶</div>
+                <div class="test-info">
+                    <h2 class="test-title">반려동물 매칭 테스트</h2>
+                    <p class="test-desc">나랑 찰떡인 댕냥이는 누구? 운명의 파트너 찾기</p>
+                </div>
+            </article>
+
+            <!-- K-Wave Tests -->
+            <article class="test-card" data-category="kwave" onclick="navigateToTest('tests/kpop-idol.html')">
+                <div class="badge-new">HOT</div>
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to right, #ff00cc 0%, #333399 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    🎤</div>
+                <div class="test-info">
+                    <h2 class="test-title">K-POP 아이돌 포지션</h2>
+                    <p class="test-desc">내가 아이돌이라면? 메인보컬? 센터? 나의 포지션 찾기</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="kwave" onclick="navigateToTest('tests/kdrama-character.html')">
+                <div class="badge-new">NEW</div>
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to top, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    🎬</div>
+                <div class="test-info">
+                    <h2 class="test-title">K-Drama 주인공 테스트</h2>
+                    <p class="test-desc">내 인생이 드라마라면? 재벌 2세? 캔디? 역할 찾기</p>
+                </div>
+            </article>
+
+            <article class="test-card" data-category="kwave" onclick="navigateToTest('tests/korean-city.html')">
+                <div class="badge-new">NEW</div>
+                <div class="test-thumbnail"
+                    style="background: linear-gradient(to top, #a8edea 0%, #fed6e3 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    🏙️</div>
+                <div class="test-info">
+                    <h2 class="test-title">한국 도시 추천 테스트</h2>
+                    <p class="test-desc">나에게 딱 맞는 한국 여행지는? 서울? 부산? 제주?</p>
+                </div>
+            </article>
+        </main>
+
+        <footer class="footer">
+            <p data-i18n="footer">© 2024 SimTest. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
